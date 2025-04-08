@@ -18,11 +18,18 @@ set(IMGUI_BACKENDS
 		${IMGUI_DIR}/backends/imgui_impl_dx11.cpp
 		${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
 )
+set(IMGUI
+		${IMGUI_DIR}/imgui.cpp
+		${IMGUI_DIR}/imgui_demo.cpp
+		${IMGUI_DIR}/imgui_draw.cpp
+		${IMGUI_DIR}/imgui_tables.cpp
+		${IMGUI_DIR}/imgui_widgets.cpp
+)
 
 # Add GLFW source files if you're building it from source
 add_subdirectory(${GLFW_DIR})
 # Create the executable from your main.cpp and backend files
-add_executable(${CMAKE_PROJECT_NAME} src/main.cpp ${IMGUI_BACKENDS} ${GLFW_DIR}/src)
+add_executable(${CMAKE_PROJECT_NAME} src/main.cpp ${IMGUI_BACKENDS} ${IMGUI} ${GLFW_DIR}/src)
 
 # Link the necessary libraries: GLFW, Direct3D, and the necessary DX libraries
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
@@ -30,4 +37,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
 		d3d11.lib
 		dxgi.lib
 		dxguid.lib
+		d3dcompiler.lib
 )

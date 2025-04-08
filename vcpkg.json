@@ -3,9 +3,6 @@
   "version-string" : "1.0.0",
   "builtin-baseline" : "5f877f132d1ac99df50f47df839467b6ee0c92b2",
   "dependencies" : [ {
-    "name" : "imgui",
-    "version>=" : "1.91.8#4"
-  }, {
     "name" : "glfw3",
     "version>=" : "3.4#1"
   } ]

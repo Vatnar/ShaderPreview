@@ -10,6 +10,7 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 #include <d3d11.h>
+#include <iostream>
 #include <tchar.h>
 
 // Data
@@ -34,7 +35,7 @@ int main(int, char**)
     //ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Shader Preview V0.1", WS_OVERLAPPEDWINDOW, 100, 100, 800, 800, nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -79,10 +80,13 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
     // Our state
-    bool show_demo_window = true;
+    bool show_demo_window = false;
     bool show_another_window = false;
+    bool show_shader_list = false;
+    bool show_shader_menu = true;
+    bool show_menu_tip = true;
     auto clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+    auto text = "No shaders loaded";
     // Main loop
     bool done = false;
     while (!done)
@@ -121,32 +125,74 @@ int main(int, char**)
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
+        if (ImGui::IsKeyPressed(ImGuiKey_Escape, false)) {
+            if (show_menu_tip) {
+                show_menu_tip = false;
+                show_shader_menu = false;
+            }
+            show_shader_menu = !show_shader_menu;
+
+        }
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize |
+                                 ImGuiWindowFlags_AlwaysAutoResize |
+                                 ImGuiWindowFlags_NoTitleBar;
+
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
             static float f = 0.0f;
             static int counter = 0;
+            if (show_shader_menu)
+            {
+                ImGui::Begin("Shader Viewer", &show_shader_menu, window_flags);
+                if (ImGui::Button("Load Shader")) {
+                    show_shader_list = true;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Load Shader from file")){}
 
-            ImGui::Begin("Shader Viewer");                          // Create a window called "Hello, world!" and append into it.
+                ImGui::SameLine();
+                if (ImGui::Button("Close Menu")) {
+                    show_shader_menu = !show_shader_menu;
+                }
+                if (show_shader_list) {
+                    if (ImGui::Button("Shader1")){
+                        text = "Loaded Shader1";
+                        show_shader_list = false;
+                    }
+                    if (ImGui::Button("Shader2")){
+                        text = "Loaded Shader2";
+                        show_shader_list = false;
+                    }
+                    if (ImGui::Button("Shader3")){
+                        text = "Loaded Shader3";
+                        show_shader_list = false;
+                    }
+                    if (ImGui::Button("Shader4")){
+                        text = "Loaded Shader4";
+                        show_shader_list = false;
+                    }
+                }
+                ImGui::Text("Will display rendered HSLS shader");               // Display some text (you can use a format strings too)
+                ImGui::Text(text);
+                ImGui::Checkbox("Enable Debug mode", &show_demo_window);      // Display extra information
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 
-            ImGui::Text("Will display rendered HSLS shader");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-            ImGui::End();
+                ImGui::End();
+            }
+            else if (show_menu_tip) {
+                ImGui::Begin("Tip", &show_menu_tip, window_flags);
+                ImGui::Text("Press Esc to toggle visibility of menu window");
+                if (ImGui::Button("Okay")) {
+                    show_menu_tip = !show_menu_tip;
+                }
+                ImGui::End();
+            }
         }
 
         // 3. Show another simple window.

@@ -1,4 +1,3 @@
-pub mod error;
-pub mod window;
+pub mod run;
 
-pub use window::runer;
+pub use run::run;

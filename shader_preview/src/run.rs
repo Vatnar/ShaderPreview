@@ -38,12 +38,12 @@ impl Mesh {
         // 3. Describe how the data in vbo is laid out
         unsafe {
             gl::VertexAttribPointer(
-                0,                                     // Attribute index (loc 0 in shader)
-                2,                                     // 2 Components per vertex (x, y)
-                gl::FLOAT,                             // Data type is float
-                gl::FALSE,                             // Dont normalize
-                2 * std::mem::size_of::<f32>() as i32, // Stride, 2 floats per vertex
-                std::ptr::null(),                      // offset: start at the beginning
+                0,                           // Attribute index (loc 0 in shader)
+                2,                           // 2 Components per vertex (x, y)
+                gl::FLOAT,                   // Data type is float
+                gl::FALSE,                   // Dont normalize
+                2 * size_of::<f32>() as i32, // Stride, 2 floats per vertex
+                std::ptr::null(),            // offset: start at the beginning
             );
             gl::EnableVertexAttribArray(0); // enable specified attributre
         }

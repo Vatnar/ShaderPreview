@@ -1,7 +1,15 @@
-use shader_preview::*;
+use shader_preview::create_window;
+use shader_preview::error::ShaderPreviewError;
 use vatnar_linalg::{Point2, Vector2};
 
-fn main() -> Result<(), error::Error> {
+fn main() {
+    if let Err(e) = run() {
+        eprintln!("Error: {}", e);
+        std::process::exit(1);
+    }
+}
+
+fn run() -> Result<(), ShaderPreviewError> {
     let size = Vector2::new(800, 600);
     create_window(size)?;
 
@@ -13,12 +21,12 @@ fn main() -> Result<(), error::Error> {
 
     origin += v * 3f64;
 
-    let screenpos: Point2<u32> = (300, 300).into();
+    let screen_pos: Point2<u32> = (600, 300).into();
 
-    let screenpos = screenpos.checked_sub((300, 400).into());
-    match screenpos {
-        Some(t) => println!("Valid op"),
-        None => println!("Out of bounds"),
+    if let Some(screen_pos) = screen_pos.checked_sub((300, 300).into()) {
+        println!("{screen_pos}")
+    } else {
+        return Err((ShaderPreviewError::out_of_bounds("Out of screen")));
     }
 
     Ok(())

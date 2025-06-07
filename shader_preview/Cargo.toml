@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 vatnar_linalg = { path = "../vatnar_linalg" }
 glfw = { version = "0.59.0", default-features = true }
+gl = "0.14.0"

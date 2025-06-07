@@ -1,5 +1,4 @@
 use crate::WindowError::InvalidSize;
-use std::fmt::{Debug, Display};
 use vatnar_linalg::Vector2;
 // Window setup, event handling, imgui stuff
 

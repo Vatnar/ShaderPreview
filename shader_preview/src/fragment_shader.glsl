@@ -1,8 +1,9 @@
 #version 330 core
 uniform float u_time;
+uniform float u_gamma;
+uniform vec3 u_color;
 out vec4 FragColor;
 
 void main() {
-    float green = 0.5 + 0.5 * sin(u_time * 5);
-    FragColor = vec4(1.0, green, 0.2, 1.0);
+    FragColor = vec4(u_color, u_gamma);
 }

@@ -1,6 +1,6 @@
+#![allow(unused)]
 pub use point::Point2;
 pub use vector::Vector2;
-
 mod scalar;
 
 pub mod vector {

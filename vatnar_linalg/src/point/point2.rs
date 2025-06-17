@@ -6,8 +6,8 @@ use std::{fmt, ops};
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct Point2<T: Scalar> {
-    x: T,
-    y: T,
+    pub x: T,
+    pub y: T,
 }
 
 impl<T: Display + Scalar> Display for Point2<T> {

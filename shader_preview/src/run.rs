@@ -95,14 +95,14 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn define_meshes() -> Vec<Mesh> {
-    let trapezoid = polygon![
+    let _trapezoid = polygon![
         Point2::new(-0.8, -0.16),
         Point2::new(0.64, 0.3),
         Point2::new(0.4, 0.4),
         Point2::new(-0.4, 0.4),
     ];
 
-    let tri = polygon![
+    let _tri = polygon![
         Point2::new(-0.64, -0.8),
         Point2::new(0.0, -0.2),
         Point2::new(0.64, -0.8),
@@ -114,7 +114,7 @@ fn define_meshes() -> Vec<Mesh> {
     let points: Vec<Point2<f32>> = (0..n)
         .map(|i| {
             let angle = i as f32 * TAU / n as f32;
-            Point2::new((angle.cos() * radius), angle.sin() * radius)
+            Point2::new(angle.cos() * radius, angle.sin() * radius)
         })
         .collect();
 
@@ -122,28 +122,27 @@ fn define_meshes() -> Vec<Mesh> {
         println!("{:?}", p);
     }
 
-    let testpoints = Polygon(points);
+    let test_points = Polygon(points);
 
     // Mesh creation needs abstraction
     vec![
-        // Mesh::from_polygon(trapezoid, gl::POINTS, (1.0, 0.0, 0.0).into()),
-        // Mesh::from_polygon(tri, gl::POINTS, (0.0, 1.0, 0.0).into()),
-        Mesh::from_polygon(testpoints, gl::POINTS, (1.0, 0.0, 0.0).into()),
+        // Mesh::from_polygon(_trapezoid, gl::POINTS, (1.0, 0.0, 0.0).into()),
+        // Mesh::from_polygon(_tri, gl::POINTS, (0.0, 1.0, 0.0).into()),
+        Mesh::from_polygon(test_points, gl::POINTS, (1.0, 0.0, 0.0).into()),
     ]
 }
 
 fn render(meshes: &Vec<Mesh>, color: Uniform) {
     unsafe {
         gl::Clear(gl::COLOR_BUFFER_BIT);
-
-        // Draw meshes
-        for mesh in meshes {
-            unsafe {
-                let (r, g, b) = mesh.color.into();
-                gl::Uniform3f(color.into(), r, g, b);
-            }
-            mesh.draw();
+    }
+    // Draw meshes
+    for mesh in meshes {
+        unsafe {
+            let (r, g, b) = mesh.color.into();
+            gl::Uniform3f(color.into(), r, g, b);
         }
+        mesh.draw();
     }
 }
 

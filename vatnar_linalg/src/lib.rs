@@ -12,7 +12,7 @@ pub mod point {
     pub use point2::Point2;
     mod point2;
 }
-
+pub use matrix::{Matrix, MatrixView};
 mod matrix;
 
 #[cfg(test)]
@@ -29,12 +29,81 @@ mod tests {
 
         assert_eq!(m.capacity(), 4);
 
-        let m = to_f64!(1, 2, 3, 4, 5, 5, 4, 3, 2, 3, -4, 3, 3, 1, 3, -4,);
+        #[rustfmt::skip]
+        let m = to_f64!(
+            1, 2, 3, 4,
+            5, 5, 4, 3,
+            2, 3, -4, 3,
+            3, 1, 3, -4,);
 
         let m = Matrix::new(4, 4, m);
         assert_eq!(m.len(), 16);
         assert_eq!(m.capacity(), 16);
 
         let m2 = m.inverse();
+    }
+    #[test]
+    fn test_matrix_eq() {
+        #[rustfmt::skip]
+        let m = to_f64!(
+            1, 2, 3, 4,
+            5, 5, 4, 3,
+            2, 3, -4, 3,
+            3, 1, 3, -4,);
+
+        let m = Matrix::new(4, 4, m);
+
+        let n = m.clone();
+
+        assert_eq!(m, n)
+    }
+    #[test]
+
+    fn test_matrix_reduce() {
+        #[rustfmt::skip]
+        let m = to_f64!(
+            1, 2, 3, 4,
+            5, 5, 4, 3,
+            2, 3, -4, 3,
+            3, 1, 3, -4,);
+
+        let m = Matrix::new(4, 4, m);
+
+        let n = m.echelon();
+        let o = m.reduced_echelon();
+    }
+    #[test]
+    fn test_matrix_sub() {
+        #[rustfmt::skip]
+        let m = to_f64!(
+            1, 2, 3, 4,
+            5, 5, 4, 3,
+            2, 3, -4, 3,
+            3, 1, 3, -4,);
+
+        let m = Matrix::new(4, 4, m);
+
+        let n = m.submatrix((1..=2), (2..=3));
+
+        println!("m_rows: {} \nm_cols: {} \nm: {m}", m.rows(), m.cols());
+        println!("n_rows: {} \nn_cols: {} \nn: {n}", n.rows(), n.cols());
+    }
+
+    #[test]
+    fn test_matrix_viewsub() {
+        #[rustfmt::skip]
+        let m = to_f64!(
+            1, 2, 3, 4,
+            5, 5, 4, 3,
+            2, 3, -4, 3,
+            3, 1, 3, -4,);
+
+        let m = Matrix::new(4, 4, m);
+
+        let n = m.view((1..=2), (2..=3));
+        let n = n.clone();
+
+        println!("m_rows: {} \nm_cols: {} \nm: {m}", m.rows(), m.cols());
+        println!("n_rows: {} \nn_cols: {} \nn: {n}", n.rows(), n.cols());
     }
 }

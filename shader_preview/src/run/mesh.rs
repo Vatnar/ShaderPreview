@@ -49,9 +49,9 @@ pub struct Color {
     b: f32,
 }
 
-impl Into<(f32, f32, f32)> for Color {
-    fn into(self) -> (f32, f32, f32) {
-        (self.r, self.g, self.b)
+impl From<Color> for (f32, f32, f32) {
+    fn from(color: Color) -> Self {
+        (color.r, color.g, color.b)
     }
 }
 

@@ -5,9 +5,10 @@ pub struct ShaderProgram {
 }
 #[derive(Clone, Copy)]
 pub struct Uniform(gl::types::GLint);
-impl Into<i32> for Uniform {
-    fn into(self) -> i32 {
-        self.0
+
+impl From<Uniform> for i32 {
+    fn from(value: Uniform) -> Self {
+        value.0
     }
 }
 

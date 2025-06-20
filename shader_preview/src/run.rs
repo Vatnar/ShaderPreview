@@ -2,10 +2,10 @@ extern crate gl;
 extern crate glfw;
 
 use crate::polygon;
-use crate::run::mesh::Polygon;
-use crate::run::shader_program::{ShaderProgram, Uniform};
 use glfw::{Action, Context, Key};
 use mesh::Mesh;
+use mesh::Polygon;
+use shader_program::{ShaderProgram, Uniform};
 use std::f32::consts::TAU;
 use vatnar_linalg::{Point2, Vector2};
 

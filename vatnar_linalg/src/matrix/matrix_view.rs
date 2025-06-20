@@ -7,7 +7,7 @@ pub struct MatrixView<'a> {
     col_range: RangeInclusive<usize>,
 }
 impl<'a> MatrixView<'a> {
-    pub fn clone(&self) -> Matrix {
+    pub fn to_matrix(&self) -> Matrix {
         self.parent
             .submatrix(self.row_range.clone(), self.col_range.clone())
     }

@@ -5,6 +5,21 @@ mod matrix_solve;
 mod matrix_trait_impl;
 mod matrix_view;
 
+/// Used for storing matrices and doing matrix operations
+/// # Examples
+/// ```
+/// use vatnar_linalg::{to_f64, Matrix};
+///  let m = to_f64!(
+///             1, 2, 3, 4,
+///             5, 5, 4, 3,
+///             2, 3, -4, 3,
+///             3, 1, 3, -4,);
+/// let m = Matrix::new(4, 4, m);
+/// ```
+/// You can also row reduce by using [`Matrix::echelon`] and [`Matrix::reduced_echelon`]
+/// ```
+/// m.echelon();
+/// ```
 #[derive(Clone)]
 pub struct Matrix {
     data: Vec<f64>,
@@ -62,23 +77,26 @@ impl Matrix {
         row_range: RangeInclusive<usize>,
         col_range: RangeInclusive<usize>,
     ) -> Self {
-        let row_range = (row_range.start() - 1..=row_range.end() - 1);
-        let col_range = (col_range.start() - 1..=col_range.end() - 1);
+        let zero_based_rows = (row_range.start() - 1)..=(row_range.end() - 1);
+        let zero_based_cols = (col_range.start() - 1)..=(col_range.end() - 1);
 
-        let mut data = Vec::with_capacity(row_range.clone().count() * col_range.clone().count());
-        for outer in row_range.clone() {
-            // walk columns
-            for j in col_range.clone() {
-                let pos_of_current_val = outer * self.cols + j;
-                data.push(self.data[pos_of_current_val]);
-            }
-        }
+        let data: Vec<f64> = zero_based_rows
+            .clone()
+            .flat_map(|row| {
+                zero_based_cols.clone().map(move |col| {
+                    let idx = row * self.cols + col;
+                    self.data[idx]
+                })
+            })
+            .collect();
+
         Matrix {
             data,
-            rows: row_range.count(),
-            cols: col_range.count(),
+            rows: zero_based_rows.count(),
+            cols: zero_based_cols.count(),
         }
     }
+
     pub fn rows(&self) -> usize {
         self.rows
     }
@@ -95,7 +113,6 @@ impl Matrix {
     }
 
     pub fn insert(&mut self, array: &[f64]) {
-        assert_eq!(self.rows * self.cols, array.len());
         self.data = array.into();
     }
 
@@ -108,5 +125,19 @@ impl Matrix {
 
     pub fn len(&self) -> usize {
         self.data.len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+impl Matrix {
+    pub fn truncate(&self, decimals: usize) -> Self {
+        let factor = 10f64.powi(decimals as i32);
+        let truncated: Vec<f64> = self
+            .data
+            .iter()
+            .map(|x| (x * factor).round() / factor)
+            .collect();
+        Matrix::new(self.rows, self.cols, truncated.as_slice())
     }
 }

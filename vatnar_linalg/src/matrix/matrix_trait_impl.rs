@@ -4,13 +4,15 @@ use std::fmt;
 impl fmt::Display for Matrix {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Matrix")?;
+
         for row in 0..self.rows {
             for col in 0..self.cols {
                 let idx = row * self.cols + col;
-                write!(f, "{} ", self.data[idx])?;
+                write!(f, "{:>3} ", self.data[idx])?;
             }
             writeln!(f)?;
         }
+
         Ok(())
     }
 }

@@ -70,7 +70,7 @@ mod tests {
         let m = Matrix::new(4, 4, m);
 
         let n = m.echelon();
-        let o = m.reduced_echelon();
+        let o = m.reduced_echelon(0);
     }
     #[test]
     fn test_matrix_sub() {
@@ -101,9 +101,79 @@ mod tests {
         let m = Matrix::new(4, 4, m);
 
         let n = m.view((1..=2), (2..=3));
-        let n = n.clone();
+        let n = n.to_matrix();
 
         println!("m_rows: {} \nm_cols: {} \nm: {m}", m.rows(), m.cols());
         println!("n_rows: {} \nn_cols: {} \nn: {n}", n.rows(), n.cols());
     }
+
+    #[test]
+    fn test_matrix_echelon() {
+        #[rustfmt::skip]
+        let m = to_f64!(
+            1, 2, 3, 4,
+            5, 5, 4, 3,
+            2, 3, -4, 3,
+            3, 1, 3, -4,);
+        let m = Matrix::new(4, 4, m);
+        let n = m.echelon();
+
+        println!("{m}");
+        println!("{n}");
+    }
+    #[test]
+    fn test_matrix_echelon2() {
+        #[rustfmt::skip]
+        let m = to_f64!(
+            3, -2, -3, 3,
+            2, 3, 3, 2,);
+        let m = Matrix::new(2, 4, m);
+        let n = m.echelon();
+
+        let u = m.reduced_echelon(0);
+
+        println!("{m}");
+        println!("{n}");
+        println!("{u}")
+    }
+
+    #[test]
+    fn test_matrix_inverse() {
+        #[rustfmt::skip]
+        let m = to_f64!(
+        2.0, 1.0, 1.0,
+        1.0, 3.0, 2.0,
+        1.0, 0.0, 0.0
+    );
+        let m = Matrix::new(3, 3, m);
+        let m_inverse = m.inverse();
+        println!("{m}, {m_inverse}")
+    }
+
+    // #[test]
+    // fn test_matrix_inverse() {
+    //     #[rustfmt::skip]
+    // let m = to_f64!(
+    //     2.0, 1.0, 1.0,
+    //     1.0, 3.0, 2.0,
+    //     1.0, 0.0, 0.0
+    // );
+    //     let m = Matrix::new(3, 3, m);
+    //     let m_inv = m.inverse();
+    //
+    //     // Compute A × A⁻¹
+    //     let product = m.clone() * m_inv.clone();
+    //
+    //     // Compare with identity
+    //     let identity = Matrix::identity(3);
+    //
+    //     // Allow floating point tolerance
+    //     for i in 0..3 {
+    //         for j in 0..3 {
+    //             let a = product[(i, j)];
+    //             let b = identity[(i, j)];
+    //             assert!((a - b).abs() < 1e-8, "Mismatch at ({}, {}): got {}, expected {}", i, j, a, b);
+    //         }
+    //     }
+    // }
 }

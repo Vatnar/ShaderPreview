@@ -1,21 +1,13 @@
+//! Heavier [`Matrix`] operations regarding solving the linear system
 use super::Matrix;
 use row::Row;
-use std::ops::{Deref, Mul, Sub};
 
 mod row;
 // TODO refactoring heavily needed
-impl Matrix {
-    pub fn inverse(&self) -> Self {
-        // add identity matrix
-        // 1 2 3 4
-        // 1 2 3 4
-        // 1 2 3 4
-        // 1 2 3 4
 
-        // 1 2 3 4 1 0 0 0
-        // 1 2 3 4 0 1 0 0
-        // 1 2 3 4 0 0 1 0
-        // 1 2 3 4 0 0 0 1
+impl Matrix {
+    /// Computes the inverse of the matrix using [`Matrix::reduced_echelon`]
+    pub fn inverse(&self) -> Self {
         assert_eq!(self.rows, self.cols); // Wont make sense if not i think TODO check this up
 
         // row number * "0" + 1 +  total row - row number * "0"
@@ -40,25 +32,20 @@ impl Matrix {
         out.cols = self.cols + self.rows;
         let out = out.reduced_echelon(out.cols - self.cols);
 
-        out.submatrix((1..=out.rows), (self.cols + 1..=out.cols))
+        out.submatrix(1..=out.rows, self.cols + 1..=out.cols)
             .truncate(5)
     }
 
     /// Reduces given matrix to echelon form \
-    /// use [`Matrix::reduced_echelon`] for reduced echelon form
-    // might need to take in if its augmented or not
+    /// use [`Matrix::echelon_aug`] for reducing with aug
     pub fn echelon(&self) -> Self {
         self.echelon_aug(0)
     }
-    pub fn echelon_aug(&self, augmented_size: usize) -> Self {
-        // Check if already in echelon form
-        // then do it
-        // augmented size is the amount of columns at the end to "ignore", unless invalid
-        // meaning for a 4x5 0000x, where x is nonzero
-        // start from left, row swap highest integer (to avoid low division), then remove that amount
-        // of that row from the others.
-        // then go next
 
+    /// Reduces given matrix to echelon_form
+    /// # Arguments
+    /// * `augmented_size` - Amount of columns of augmented part, 0 if no augmented part
+    pub fn echelon_aug(&self, augmented_size: usize) -> Self {
         let mut rows = self.extract_rows();
 
         // Do this for every column (except augmented_size at end)
@@ -71,7 +58,7 @@ impl Matrix {
             }
             let mut highest_row = (completed_rows, rows[completed_rows][current_col].abs());
 
-            for (i, row) in rows
+            for (i, _) in rows
                 .iter()
                 .enumerate()
                 .take(self.rows)
@@ -101,7 +88,8 @@ impl Matrix {
         matrix.truncate(5)
     }
 
-    fn from_rows(mut rows: Vec<Row>) -> Matrix {
+    /// Creates a matrix from a vector of [`Row`]
+    fn from_rows(rows: Vec<Row>) -> Matrix {
         let mut matrix = Matrix::empty(rows.len(), rows[0].len());
         for row in rows {
             matrix.data.extend(row.values);
@@ -110,6 +98,7 @@ impl Matrix {
         matrix
     }
 
+    /// Creates a vector of [`Row`] from Matrix
     fn extract_rows(&self) -> Vec<Row> {
         let mut rows: Vec<Row> = Vec::with_capacity(self.rows);
         for i in 0..self.rows {
@@ -124,12 +113,15 @@ impl Matrix {
 
     /// Reduces given matrix to reduced echelon form \
     /// use [`Matrix::echelon`] for echelon form
+    ///
+    /// # Arguments
+    /// * `augmented_size` - Amount of columns of augmented part, 0 if no augmented part
     pub fn reduced_echelon(&self, augmented_size: usize) -> Self {
         let mut rows = self.echelon_aug(augmented_size).extract_rows();
 
         // normalize
         for row in &mut rows {
-            if let Some((i, &lead)) = row
+            if let Some((_, &lead)) = row
                 .iter()
                 .enumerate()
                 .find(|&(_, &x)| x.abs() > f64::EPSILON)

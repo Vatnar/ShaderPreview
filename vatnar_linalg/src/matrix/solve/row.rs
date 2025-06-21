@@ -1,5 +1,8 @@
+//! Internal row type for representing rows in a matrix
 use std::ops::{Deref, Mul, Sub};
+use std::ops::{Index, IndexMut};
 
+/// Used internally for representing rows, not the fastest but good for now TODO
 #[derive(Clone)]
 pub(super) struct Row {
     pub(crate) values: Vec<f64>,
@@ -46,8 +49,6 @@ impl Sub for Row {
         Row { values }
     }
 }
-
-use std::ops::{Index, IndexMut};
 
 impl Index<usize> for Row {
     type Output = f64;

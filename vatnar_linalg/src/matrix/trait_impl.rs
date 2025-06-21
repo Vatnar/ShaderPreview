@@ -1,3 +1,4 @@
+//! Trait implementations for [`Matrix`]
 use super::Matrix;
 use std::fmt;
 

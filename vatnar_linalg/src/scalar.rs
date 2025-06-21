@@ -1,6 +1,16 @@
+//! [`Scalar`] trait
 use num_traits::Num;
 use std::ops::{Add, Div, Mul, Sub};
 
+/// [`Scalar`] trait to specify what types a vector or point can be created with \
+/// Required traits: \
+/// [`Copy`] \
+/// [`Add`] \
+/// [`Sub`] \
+/// [`Mul`] \
+/// [`Div`] \
+/// [`PartialOrd`] \
+/// [`PartialEq`]
 pub trait Scalar:
     Num
     + Copy
@@ -12,6 +22,7 @@ pub trait Scalar:
     + PartialEq
 {
 }
+/// Blanket implementation, implement on all types that implement traits: \
 
 impl<T> Scalar for T where
     T: Num

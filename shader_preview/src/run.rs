@@ -1,7 +1,7 @@
 extern crate gl;
 extern crate glfw;
 
-use crate::polygon;
+pub use crate::polygon;
 use glfw::{Action, Context, Key};
 use mesh::Mesh;
 use mesh::Polygon;
@@ -9,7 +9,7 @@ use shader_program::{ShaderProgram, Uniform};
 use std::f32::consts::TAU;
 use vatnar_linalg::{Point2, Vector2};
 
-mod mesh;
+pub(crate) mod mesh;
 mod shader_program;
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut glfw = glfw::init(glfw::fail_on_errors)?;
@@ -95,18 +95,9 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn define_meshes() -> Vec<Mesh> {
-    let _trapezoid = polygon![
-        Point2::new(-0.8, -0.16),
-        Point2::new(0.64, 0.3),
-        Point2::new(0.4, 0.4),
-        Point2::new(-0.4, 0.4),
-    ];
+    let _trapezoid = polygon![-0.8, -0.16, 0.64, 0.3, 0.4, 0.4, -0.4, 0.4,];
 
-    let _tri = polygon![
-        Point2::new(-0.64, -0.8),
-        Point2::new(0.0, -0.2),
-        Point2::new(0.64, -0.8),
-    ];
+    let _tri = polygon![-0.64, -0.8, 0.0, -0.2, 0.64, -0.8,];
 
     let n = 5; // Try 10 points
     let radius = 0.5;

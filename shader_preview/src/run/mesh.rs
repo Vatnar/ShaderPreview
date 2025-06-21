@@ -17,19 +17,21 @@ impl Deref for Polygon {
 /// # Example
 /// ```
 /// use shader_preview::polygon;
+///
 /// let poly = polygon![
-///     Point2::new(0.0, 0.0),
-///     Point2::new(1.0, 0.0),
-///     Point2::new(1.0, 1.0),
-///     Point2::new(0.0, 1.0),
+///     0.0, 0.0,
+///     1.0, 0.0,
+///     1.0, 1.0,
+///     0.0, 1.0,
 /// ];
+/// assert_eq!(poly.len(), 4);
 /// ```
 #[macro_export]
 macro_rules! polygon {
-    ( $( Point2::new($x:expr, $y:expr) ),* $(,)? ) => {
-        Polygon(vec![
+    ( $( $x:expr, $y:expr ),* $(,)? ) => {
+        $crate::Polygon(vec![
             $(
-                Point2::new($x, $y)
+                vatnar_linalg::Point2::<f32>::new($x, $y)
             ),*
         ])
     };

@@ -2,12 +2,12 @@ extern crate gl;
 extern crate glfw;
 
 pub use crate::polygon;
+use gl::TRIANGLES;
+use gl::types::GLfloat;
 use glfw::{Action, Context, Key};
 use mesh::Mesh;
-use mesh::Polygon;
 use shader_program::{ShaderProgram, Uniform};
-use std::f32::consts::TAU;
-use vatnar_linalg::{Point2, Vector2};
+use vatnar_linalg::Vector2;
 
 pub(crate) mod mesh;
 mod shader_program;
@@ -28,6 +28,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     // set window to current on thread, and turn on key polling
     window.make_current();
     window.set_key_polling(true);
+    window.set_scroll_polling(true);
     glfw.set_swap_interval(glfw::SwapInterval::Sync(1)); // v-sync
 
     // Initializes OpenGL function pointers by querying their addresses from the current context.
@@ -51,8 +52,14 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     // Setup uniforms
     let time_uniform = shader_program.get_uniform("u_time");
     let color_uniform = shader_program.get_uniform("u_color");
-    let gamma_uniform = shader_program.get_uniform("u_gamma");
-    let mut gamma: f32 = 0.5;
+
+    let offset_uniform = shader_program.get_uniform("u_offset");
+    let zoom_uniform = shader_program.get_uniform("u_zoom");
+
+    // The offset sort of acts like moving a camera
+    // TODO MARK figure out "zooming"
+    let mut offset: Vector2<f64> = Vector2::new(0.0, 0.0);
+    let mut zoom = 1.0;
 
     let meshes = define_meshes();
 
@@ -61,30 +68,68 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     unsafe {
-        gl::Uniform3f(color_uniform.into(), 1.0, 0.2, 0.5);
+        gl::Uniform3f(*color_uniform, 1.0, 0.2, 0.5);
+        gl::Uniform2f(*offset_uniform, 1.0, 0.0);
     }
+
+    let mut offset_keys = Vector2::new(0, 0);
+
     // main loop
     while !window.should_close() {
         glfw.poll_events();
+
+        // TODO change so it checks for releases and stuff
+        // instead so you can hold both left and down fir instance and it work
         for (_, event) in glfw::flush_messages(&window_event_receiver) {
-            println!("Event gotten: {event:?}");
+            // println!("Event gotten: {event:?}"); // DEBUG
+
+            use glfw::WindowEvent::{Key as glfwKey, Scroll};
             match event {
-                glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
-                    window.set_should_close(true)
-                }
-                glfw::WindowEvent::Key(Key::Up, _, Action::Press | Action::Repeat, _) => {
-                    gamma = (gamma + 0.1).clamp(0.0, 1.0)
-                }
-                glfw::WindowEvent::Key(Key::Down, _, Action::Press | Action::Repeat, _) => {
-                    gamma = (gamma - 0.1).clamp(0.0, 1.0)
+                glfwKey(Key::Escape, _, Action::Press, _) => window.set_should_close(true),
+
+                // Camera movement
+                glfwKey(Key::Left | Key::A, _, action, _) => match action {
+                    Action::Press => offset_keys.x += 1,
+                    Action::Release => offset_keys.x -= 1,
+                    _ => {}
+                },
+
+                glfwKey(Key::Right | Key::D, _, action, _) => match action {
+                    Action::Press => offset_keys.x -= 1,
+                    Action::Release => offset_keys.x += 1,
+                    _ => {}
+                },
+
+                glfwKey(Key::Up | Key::W, _, action, _) => match action {
+                    Action::Press => offset_keys.y -= 1,
+                    Action::Release => offset_keys.y += 1,
+                    _ => {}
+                },
+
+                glfwKey(Key::Down | Key::S, _, action, _) => match action {
+                    Action::Press => offset_keys.y += 1,
+                    Action::Release => offset_keys.y -= 1,
+                    _ => {}
+                },
+
+                // Zoom
+                Scroll(_, y_offset) => {
+                    zoom += y_offset;
+                    if zoom as i32 == 0 {
+                        zoom += y_offset
+                    }
                 }
                 _ => {}
             }
         }
 
         unsafe {
-            gl::Uniform1f(time_uniform.into(), glfw.get_time() as f32); // update u_time
-            gl::Uniform1f(gamma_uniform.into(), gamma);
+            gl::Uniform1f(*time_uniform, glfw.get_time() as f32); // update u_time
+            gl::Uniform2f(*offset_uniform, offset.x as GLfloat, offset.y as GLfloat);
+            let scale = if zoom < 0.0 { -1.0 / zoom } else { zoom };
+            offset += offset_keys.normalized_i32() * 0.01 * (1.0 / scale);
+
+            gl::Uniform1f(*zoom_uniform, scale as GLfloat)
         }
 
         render(&meshes, color_uniform);
@@ -95,31 +140,20 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn define_meshes() -> Vec<Mesh> {
-    let _trapezoid = polygon![-0.8, -0.16, 0.64, 0.3, 0.4, 0.4, -0.4, 0.4,];
+    let triangle1 = polygon![-0.5, -0.5, 0.0, 0.5, 0.5, -0.5];
+    let triangle2 = polygon![-0.8, 0.2, -0.3, 0.9, 0.2, 0.3];
+    let triangle3 = polygon![5.0, 5.0, 6.0, 5.0, 5.5, 6.0];
+    let triangle4 = polygon![-7.0, 4.0, -6.0, 4.0, -6.5, 5.0];
+    let triangle5 = polygon![3.0, -5.0, 4.0, -5.0, 3.5, -6.0];
+    let triangle6 = polygon![-4.0, -4.0, -3.0, -4.0, -3.5, -5.0];
 
-    let _tri = polygon![-0.64, -0.8, 0.0, -0.2, 0.64, -0.8,];
-
-    let n = 5; // Try 10 points
-    let radius = 0.5;
-
-    let points: Vec<Point2<f32>> = (0..n)
-        .map(|i| {
-            let angle = i as f32 * TAU / n as f32;
-            Point2::new(angle.cos() * radius, angle.sin() * radius)
-        })
-        .collect();
-
-    for p in &points {
-        println!("{:?}", p);
-    }
-
-    let test_points = Polygon(points);
-
-    // Mesh creation needs abstraction
     vec![
-        // Mesh::from_polygon(_trapezoid, gl::POINTS, (1.0, 0.0, 0.0).into()),
-        // Mesh::from_polygon(_tri, gl::POINTS, (0.0, 1.0, 0.0).into()),
-        Mesh::from_polygon(test_points, gl::POINTS, (1.0, 0.0, 0.0).into()),
+        Mesh::from_polygon(triangle1, TRIANGLES, (1.0, 0.0, 0.0).into()),
+        Mesh::from_polygon(triangle2, TRIANGLES, (0.0, 1.0, 0.0).into()),
+        Mesh::from_polygon(triangle3, TRIANGLES, (0.0, 0.0, 1.0).into()),
+        Mesh::from_polygon(triangle4, TRIANGLES, (1.0, 1.0, 0.0).into()),
+        Mesh::from_polygon(triangle5, TRIANGLES, (0.0, 1.0, 1.0).into()),
+        Mesh::from_polygon(triangle6, TRIANGLES, (1.0, 1.0, 1.0).into()),
     ]
 }
 
@@ -136,6 +170,3 @@ fn render(meshes: &Vec<Mesh>, color: Uniform) {
         mesh.draw();
     }
 }
-
-#[cfg(test)]
-mod tests {}

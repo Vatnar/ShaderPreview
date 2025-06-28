@@ -1,4 +1,5 @@
 use std::ffi::{CStr, CString};
+use std::ops::Deref;
 
 pub struct ShaderProgram {
     pub(crate) id: u32,
@@ -9,6 +10,14 @@ pub struct Uniform(gl::types::GLint);
 impl From<Uniform> for i32 {
     fn from(value: Uniform) -> Self {
         value.0
+    }
+}
+
+impl Deref for Uniform {
+    type Target = i32;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -88,6 +97,7 @@ impl ShaderProgram {
                 gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
                 let error = CString::new(vec![b' '; len as usize]).unwrap();
                 gl::GetShaderInfoLog(shader, len, std::ptr::null_mut(), error.as_ptr() as *mut _);
+                // TODO MARK this needs to be thrown up somehow later
                 panic!("Shader compilation error: {:?}", error);
             }
 

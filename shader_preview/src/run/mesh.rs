@@ -74,7 +74,6 @@ pub struct Mesh {
     pub color: Color,
 }
 
-// TODO from points nd lines and stuff
 impl Mesh {
     pub fn from_polygon(polygon: Polygon, draw_mode: gl::types::GLenum, color: Color) -> Self {
         let vertices: Vec<f32> = polygon.iter().flat_map(|p| [p.x, p.y]).collect();

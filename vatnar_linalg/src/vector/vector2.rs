@@ -23,8 +23,17 @@ where
     T: Float,
 {
     /// Returns magnitude of vector
-    pub fn mag(self) -> T {
+    pub fn mag(&self) -> T {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+
+    pub fn normalized(&self) -> Self {
+        let mag = self.mag();
+        if mag.is_zero() {
+            Self::new(T::zero(), T::zero())
+        } else {
+            Self::new(self.x / mag, self.y / mag)
+        }
     }
 
     /// Returns dot product of two vectors
@@ -43,6 +52,12 @@ where
     }
 }
 
+impl Vector2<i32> {
+    pub fn normalized_i32(&self) -> Vector2<f64> {
+        let v = Vector2::new(self.x as f64, self.y as f64);
+        v.normalized()
+    }
+}
 impl<T: Scalar + CheckedSub> Vector2<T> {
     /// subtraction for unsigned types
     pub fn checked_sub(self, rhs: Self) -> Option<Vector2<T>> {
